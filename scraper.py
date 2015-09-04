@@ -62,8 +62,10 @@ def convert_mth_strings ( mth_string ):
         mth_string = mth_string.replace(k, v)
     return mth_string
 # pull down the content from the webpage
-html = urllib2.urlopen(url)
-soup = BeautifulSoup(html, 'lxml')
+#html = urllib2.urlopen(url)
+#soup = BeautifulSoup(html, 'lxml')
+html = requests.get(url)
+soup = BeautifulSoup(html.text, 'lxml')
 # find all entries with the required class
 block = soup.find('table', attrs = {'border':'1'})
 links = block.find_all('a')
