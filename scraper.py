@@ -8,10 +8,10 @@ import scraperwiki
 import urllib2
 from datetime import datetime
 from bs4 import BeautifulSoup
-import requests
 
 
-#### FUNCTIONS 1.0
+#### FUNCTIONS 1.2
+import requests      #import to validate URL
 
 def validateFilename(filename):
     filenameregex = '^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9]+_[0-9][0-9][0-9][0-9]_[0-9QY][0-9]$'
@@ -38,6 +38,7 @@ def validateFilename(filename):
 
 
 def validateURL(url):
+
     try:
         r = requests.get(url, allow_redirects=True, timeout=20)
         count = 1
@@ -51,11 +52,12 @@ def validateURL(url):
         else:
             ext = os.path.splitext(url)[1]
         validURL = r.status_code == 200
-        validFiletype = ext in ['.csv', '.xls', '.xlsx']
+        validFiletype = ext.lower() in ['.csv', '.xls', '.xlsx']
         return validURL, validFiletype
     except:
         print ("Error validating URL.")
         return False, False
+
 
 def validate(filename, file_url):
     validFilename = validateFilename(filename)
@@ -90,9 +92,9 @@ errors = 0
 data = []
 
 
-#### READ HTML 1.1 - no "lxml"
+#### READ HTML 1.2
 
-html = requests.get(url)
+html = requests.get(url)     # using requests to avoid 500 errors
 soup = BeautifulSoup(html.text, 'lxml')
 
 #### SCRAPE DATA
