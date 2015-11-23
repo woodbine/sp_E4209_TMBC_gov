@@ -119,6 +119,29 @@ for link in links:
         todays_date = str(datetime.now())
         data.append([csvYr, csvMth, url])
 
+pre_block_url = 'http://www.trafford.gov.uk'+soup.find_all('a', 'sys_0 sys_t5863')[1]['href']
+pre_html = requests.get(pre_block_url)
+pre_soup = BeautifulSoup(pre_html.text, 'lxml')
+block = pre_soup.find('table', attrs = {'style':'width: 100%;'})
+links = block.find_all('a')
+for link in links:
+    if '?' not in link['href']:
+        if 'http://' not in link['href']:
+            url = 'http://www.trafford.gov.uk' + link['href']
+        csvYrs = link['href'].split('/')[-1].split('.csv')[0].split('_')
+        if len(csvYrs) == 2:
+            csvYr = csvYrs[0]
+            csvMth = csvYrs[-1]
+        if len(csvYrs) == 1:
+            csvYr = csvYrs[0][:4]
+            csvMth = csvYrs[0][-2:]
+
+        if 'SEP2' in csvYrs[0]:
+            csvYr = '2014'
+            csvMth = '09'
+        csvMth = convert_mth_strings(csvMth.upper())
+        todays_date = str(datetime.now())
+        data.append([csvYr, csvMth, url])
 
 #### STORE DATA 1.0
 
