@@ -52,7 +52,7 @@ def validateURL(url):
         else:
             ext = os.path.splitext(url)[1]
         validURL = r.status_code == 200
-        validFiletype = ext.lower() in ['.csv', '.xls', '.xlsx']
+        validFiletype = ext.lower() in ['.csv', '.xls', '.xlsx', '.zip']
         return validURL, validFiletype
     except:
         print ("Error validating URL.")
@@ -99,49 +99,21 @@ soup = BeautifulSoup(html.text, 'lxml')
 
 #### SCRAPE DATA
 
-block = soup.find('table', attrs = {'border':'1'})
-links = block.find_all('a')
+links = soup.find_all('a', 'sys_15')
 for link in links:
-    if '?' not in link['href']:
-        url = 'http://www.trafford.gov.uk' + link['href']
-        csvYrs = link['href'].split('/')[-1].split('.csv')[0].split('_')
-        if len(csvYrs) == 2:
-            csvYr = csvYrs[0]
-            csvMth = csvYrs[-1]
-        if len(csvYrs) == 1:
-            csvYr = csvYrs[0][:4]
-            csvMth = csvYrs[0][-2:]
-
-        if 'SEP2' in csvYrs[0]:
-            csvYr = '2014'
-            csvMth = '09'
+        csv_file = link['title']
+        csvMth = csv_file.split('_')[-1]
+        csvYr = csv_file.split('_')[0]
+        url = 'http://www.trafford.gov.uk'+link['href']
         csvMth = convert_mth_strings(csvMth.upper())
         todays_date = str(datetime.now())
         data.append([csvYr, csvMth, url])
+arch_link = 'http://www.trafford.gov.uk'+soup.find('a', attrs={'title':'Supplier spend archive'})['href']
+csvMth = 'Y1'
+csvYr = '2015'
+csvMth = convert_mth_strings(csvMth.upper())
+data.append([csvYr, csvMth, url])
 
-pre_block_url = 'http://www.trafford.gov.uk'+soup.find_all('a', 'sys_0 sys_t5863')[1]['href']
-pre_html = requests.get(pre_block_url)
-pre_soup = BeautifulSoup(pre_html.text, 'lxml')
-block = pre_soup.find('table', attrs = {'style':'width: 100%;'})
-links = block.find_all('a')
-for link in links:
-    if '?' not in link['href']:
-        if 'http://' not in link['href']:
-            url = 'http://www.trafford.gov.uk' + link['href']
-        csvYrs = link['href'].split('/')[-1].split('.csv')[0].split('_')
-        if len(csvYrs) == 2:
-            csvYr = csvYrs[0]
-            csvMth = csvYrs[-1]
-        if len(csvYrs) == 1:
-            csvYr = csvYrs[0][:4]
-            csvMth = csvYrs[0][-2:]
-
-        if 'SEP2' in csvYrs[0]:
-            csvYr = '2014'
-            csvMth = '09'
-        csvMth = convert_mth_strings(csvMth.upper())
-        todays_date = str(datetime.now())
-        data.append([csvYr, csvMth, url])
 
 #### STORE DATA 1.0
 
@@ -164,4 +136,3 @@ if errors > 0:
 
 
 #### EOF
-
